@@ -1,0 +1,8 @@
+bin/
+lib/
+include/
+verifycode.egg-info/
+.vscode/
+fonts/
+.DS_store
+__pycache__/
