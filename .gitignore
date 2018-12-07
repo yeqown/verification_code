@@ -4,8 +4,11 @@ include/
 verifycode.egg-info/
 .vscode/
 build/
-fonts/
+# fonts/
 .DS_store
 __pycache__/
 testcase/
+# packaging build folders
 dist/
+build/
+verifycode.egg-info/
