@@ -15,10 +15,10 @@ class Generator(object):
     also support hash filename.
     '''
 
-    def __init__(self, is_hash_filename:bool=False, code:str="", 
-        width:int=100, height:int=40, fontsize=20):
+    def __init__(self, is_hash_filename:bool=False,width:int=100,
+         height:int=40, fontsize=20):
         self.is_hash_filename = is_hash_filename
-        self.code = code
+        self.code = ""
         self.img = None
         self.width = width
         self.height = height
@@ -44,25 +44,28 @@ class Generator(object):
         if not path.exists(path_or_filename):
             print("verifycode error: could not found path: {path}".format(path=path_or_filename))
             return DEFAULT_FILENAME
-        
         return path_or_filename
 
     def save(self, save_to_path:str, need_format=True):
+        '''args: save_to_path: string, need_format: bool
+        return save_to_path that be formatted or not.
+        '''
         if need_format:
             save_to_path = self._format_savepath(save_to_path)
-        print("debug save to path:", save_to_path)
+        # print("debug save to path:", save_to_path)
         self.img.save(save_to_path)
+        return save_to_path
 
-    def generate(self, code: str):
+    def generate(self, code: str=""):
         '''create a new Image and merge with code img
         code has a max length
         '''
         if not code:
             raise Exception("could not generate empty code: %s" % (code))
-        
+        self.code = code
+
         if len(code) > 6:
-            print("max limit is 6 size of code")
-            return
+            raise CodeOverLenError(len(code), 6)
 
         self.img = Image.new('RGBA', (self.width, self.height), color=CustomColor.WHITE)
         draw = ImageDraw.Draw(self.img)
@@ -87,14 +90,17 @@ class Generator(object):
 
         for code in codes:
             self.generate(code)
-            # initial save_to_path name
-            save_to_path = "{code}.png".format(code)
-            # if need hash_name
+            save_to_path = "{code}.png".format(code=code)
             if self.is_hash_filename:
                 save_to_path = md5(code)
             # if duplicate name
             if save_to_path in _hash_dict:
-                save_to_path = "{ori}_1".format(save_to_path)
+                _hash_dict[save_to_path] = _hash_dict[save_to_path]+1
+                save_to_path = "{ori}_{cnt}.png".format(ori=save_to_path, cnt=_hash_dict[save_to_path])
+            else:
+                _hash_dict.update({save_to_path: 1})
+            
+            save_to_path = path.join(folder, save_to_path)
             # now save to file
             self.save(save_to_path, need_format=False)
 
@@ -124,3 +130,13 @@ class CustomColor(object):
         [BLACK,GRAY,RED,GREEN,YELLOW,BLUE]
         '''
         return choice(cls._colors)
+
+
+class CodeOverLenError(Exception):
+
+    def __init__(self, len, limit_len):
+        self.len = len
+        self.limit_len = limit_len
+
+    def __str__(self):
+        return "code length(%d) is out range of (%d)" % (self.len, self.limit_len)

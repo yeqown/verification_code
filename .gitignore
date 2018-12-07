@@ -3,6 +3,9 @@ lib/
 include/
 verifycode.egg-info/
 .vscode/
+build/
 fonts/
 .DS_store
 __pycache__/
+testcase/
+dist/
