@@ -1,3 +1,4 @@
+import sys
 import hashlib
 import os.path as path
 from PIL import Image, ImageFont, ImageDraw, ImageColor
@@ -16,15 +17,19 @@ class Generator(object):
     '''
 
     def __init__(self, is_hash_filename:bool=False,width:int=100,
-         height:int=40, fontsize=20):
+         height:int=40, fontsize=20, fonttype=None):
         self.is_hash_filename = is_hash_filename
         self.code = ""
-        self.img = None
         self.width = width
         self.height = height
         self._fontsize = fontsize
-        # TODO: related to system
-        self.font = ImageFont.truetype('fonts/STHeiti Light.ttc', fontsize) 
+        self._img = None
+
+        fonttype = "fonts/STHeiti Light.ttc"
+        if not fonttype and sys.platform != "darwin":
+            fonttype = 'fonts/Courier.dfont'
+
+        self.font = ImageFont.truetype(fonttype, fontsize)
 
     def _format_savepath(self, path_or_filename:str):
         '''args: path_or_filename if is dir and is_hash_filename is True, 
@@ -53,11 +58,11 @@ class Generator(object):
         if need_format:
             save_to_path = self._format_savepath(save_to_path)
         # print("debug save to path:", save_to_path)
-        self.img.save(save_to_path)
+        self._img.save(save_to_path)
         return save_to_path
 
     def generate(self, code: str=""):
-        '''create a new Image and merge with code img
+        '''create a new Image and merge with code _img
         code has a max length
         '''
         if not code:
@@ -67,8 +72,8 @@ class Generator(object):
         if len(code) > 6:
             raise CodeOverLenError(len(code), 6)
 
-        self.img = Image.new('RGBA', (self.width, self.height), color=CustomColor.WHITE)
-        draw = ImageDraw.Draw(self.img)
+        self._img = Image.new('RGBA', (self.width, self.height), color=CustomColor.WHITE)
+        draw = ImageDraw.Draw(self._img)
         basestep = self.width / len(code)
         
         fonty = (self.height - self._fontsize) /2
