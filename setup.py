@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'verifycode',
-    version = '0.1.0',
+    version = '0.1.1',
     keywords='verificationcode',
     description = 'a library for generate verificatio code png',
     license = 'MIT License',
