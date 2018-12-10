@@ -1,8 +1,8 @@
 import sys
 import hashlib
 import os.path as path
-from PIL import Image, ImageFont, ImageDraw, ImageColor
-from random import choice
+from PIL import Image, ImageFont, ImageDraw, ImageColor, ImageFilter
+from random import choice, randint
 
 def md5(s:str):
     h = hashlib.md5()
@@ -12,12 +12,13 @@ def md5(s:str):
 DEFAULT_FILENAME = 'default.png'
 
 class Generator(object):
-    '''Generator to generate Image of code and can be save into file or files
+    '''
+    Generator to generate Image of code and can be save into file or files
     also support hash filename.
     '''
 
-    def __init__(self, is_hash_filename:bool=False,width:int=100,
-         height:int=40, fontsize=20, fonttype=None):
+    def __init__(self, is_hash_filename:bool=False,width:int=200,
+         height:int=80, fontsize=60, fonttype=None):
         self.is_hash_filename = is_hash_filename
         self.code = ""
         self.width = width
@@ -25,14 +26,15 @@ class Generator(object):
         self._fontsize = fontsize
         self._img = None
 
-        fonttype = "fonts/STHeiti Light.ttc"
+        fonttype = "fonts/Courier.dfont"
         if not fonttype and sys.platform != "darwin":
             fonttype = 'fonts/Courier.dfont'
 
         self.font = ImageFont.truetype(fonttype, fontsize)
 
     def _format_savepath(self, path_or_filename:str):
-        '''args: path_or_filename if is dir and is_hash_filename is True, 
+        '''
+        args: path_or_filename if is dir and is_hash_filename is True, 
         then new a hash filename
         return: formated path_or_filename
         '''
@@ -52,7 +54,8 @@ class Generator(object):
         return path_or_filename
 
     def save(self, save_to_path:str, need_format=True):
-        '''args: save_to_path: string, need_format: bool
+        '''
+        args: save_to_path: string, need_format: bool
         return save_to_path that be formatted or not.
         '''
         if need_format:
@@ -61,8 +64,28 @@ class Generator(object):
         self._img.save(save_to_path)
         return save_to_path
 
+    @classmethod
+    def img_blur(cls, img: Image):
+        width, height = img.size
+        draw = ImageDraw.Draw(img)
+        # 划线
+        for i in range(5):
+            x1=randint(0,width)
+            x2=randint(0,width)
+            y1=randint(0,height)
+            y2=randint(0,height)
+            draw.line((x1,y1,x2,y2),fill=get_rand_color())
+
+        # 画点
+        for i in range(30):
+            draw.point([randint(0, width), randint(0, height)], fill=get_rand_color())
+            x = randint(0, width)
+            y = randint(0, height)
+            draw.arc((x, y, x + 4, y + 4), 0, 90, fill=get_rand_color())
+
     def generate(self, code: str=""):
-        '''create a new Image and merge with code _img
+        '''
+        create a new Image and merge with code _img
         code has a max length
         '''
         if not code:
@@ -73,19 +96,36 @@ class Generator(object):
             raise CodeOverLenError(len(code), 6)
 
         self._img = Image.new('RGBA', (self.width, self.height), color=CustomColor.WHITE)
-        draw = ImageDraw.Draw(self._img)
-        basestep = self.width / len(code)
-        
-        fonty = (self.height - self._fontsize) /2
+        # self._img = Image.new('RGBA', (self.width, self.height))
+        basestep = int(self.width / len(code))
 
         for pos, c in enumerate(code):
-            rcolor = CustomColor.rand_color() # ran font color
-            roffset = -10 # [+fontsize - -fontsize]
-            if pos == 0 and roffset < 0:
-                roffset = 0
-            draw.text((pos*basestep+roffset, fonty), c, fill=rcolor, font=self.font)
-        
-        
+            txt_img = self._gen_txt_img(c, self._fontsize, self.font)
+            roffset = randint(-10 ,10)
+            
+            # set the position and paste the code image
+            x, y = pos*basestep+roffset, int((self.height - txt_img.height)/2)
+            
+            if x < 0: 
+                x = 0
+            if x > self.width:
+                x = self.width
+            self._img.paste(txt_img, box=(x, y), mask=txt_img)
+
+        # ImageFilter.GaussianBlur
+        self._img = self._img.filter(ImageFilter.GaussianBlur(radius=2))
+        # blur image
+        self.img_blur(self._img)
+
+    @classmethod
+    def _gen_txt_img(cls, text: str, fontsize: int, font):
+        img = Image.new('RGBA', (fontsize, fontsize))
+        text_draw = ImageDraw.Draw(img)
+        rcolor = CustomColor.rand_color() # ran font color
+        text_draw.text((0,0), text, fill=rcolor, font=font)
+        img = img.rotate(angle=randint(-30,90), expand=False)
+        return img
+
     def generate_multi(self, codes: list, folder: str):
         # check folder existed
         if not path.exists(folder):
@@ -109,6 +149,9 @@ class Generator(object):
             # now save to file
             self.save(save_to_path, need_format=False)
 
+
+def get_rand_color():
+    return CustomColor.rand_color()
 
 class CustomColor(object):
 
