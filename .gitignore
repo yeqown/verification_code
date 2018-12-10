@@ -12,3 +12,5 @@ testcase/
 dist/
 build/
 verifycode.egg-info/
+
+*.pyc
