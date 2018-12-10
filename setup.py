@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'verifycode',
-    version = '0.2.0',
+    version = '0.2.1',
     keywords='verificationcode',
     description = 'a library for generate verificatio code png',
     license = 'MIT License',
@@ -11,6 +11,6 @@ setup(
     author_email = 'yeqown@gmail.com',
     packages = find_packages(),
     include_package_data = True,
-    platforms = 'OSX',
+    platforms = ['OSX', 'win'],
     install_requires = ['pillow'],
 )

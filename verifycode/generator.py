@@ -26,9 +26,11 @@ class Generator(object):
         self._fontsize = fontsize
         self._img = None
 
-        fonttype = "fonts/Courier.dfont"
-        if not fonttype and sys.platform != "darwin":
+        # fonttype = "fonts/Courier.dfont"
+        if sys.platform == "darwin":
             fonttype = 'fonts/Courier.dfont'
+        else:
+            fonttype = 'arial.ttf'
 
         self.font = ImageFont.truetype(fonttype, fontsize)
 

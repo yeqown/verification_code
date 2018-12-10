@@ -5,6 +5,8 @@
 
 # test
 python3 -m unittest
+# clear packing folders
+rm -fr build/ dist/
 # packing
 python3 setup.py sdist bdist_wheel
 # upload 
