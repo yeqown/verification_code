@@ -49,9 +49,9 @@ class Generator(object):
             path_or_filename= path.join(path_or_filename, name)
             return path_or_filename
         
-        # not dir as a filename
-        if not path.exists(path_or_filename):
-            print("verifycode error: could not found path: {path}".format(path=path_or_filename))
+        # not dir as a filename and exists
+        if path.exists(path_or_filename):
+            print("verifycode warning: filename was found, filename={path}".format(path=path_or_filename))
             return DEFAULT_FILENAME
         return path_or_filename
 
