@@ -31,8 +31,14 @@ class TestGenerator(unittest.TestCase):
         g = Generator(is_hash_filename=False)
         g.generate(code="12312")
         name = g._format_savepath(path_or_filename="./testcase")
-        g.save(name, need_format=False)
+        # g.save(name, need_format=False)
         self.assertEqual(name, "./testcase/12312.png")
+
+        name = g._format_savepath("a.png")
+        self.assertEqual(name, "a.png")
+
+        name = g._format_savepath("./a.png")
+        self.assertEqual(name, "./a.png")
 
         g2 = Generator()
         name = g2._format_savepath(path_or_filename="./testcase")
@@ -52,3 +58,6 @@ class TestGenerator(unittest.TestCase):
     def test_generate_multi(self):
         g = Generator()
         g.generate_multi(codes=["123123","412322", "123"], folder="./testcase")
+
+if __name__ == "__main__":
+    unittest.main()
